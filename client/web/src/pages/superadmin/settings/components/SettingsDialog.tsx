@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  HelpCircle,
-  Loader2,
-  ScanLine,
-  UserCog,
-  UsersRound,
-} from "lucide-react";
+import { UserCog, UsersRound } from "lucide-react";
 import * as React from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -21,24 +14,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { errorAlert, getRequest, putRequest } from "@/shared/lib/api";
 import { cn } from "@/shared/lib/utils";
-import type { ShortAnswerQuestion } from "@/types";
 
 import ApplicationsTab from "../tabs/ApplicationsTab";
-import { QuestionsTab } from "../tabs/QuestionsTab";
-import type { ScanType } from "../tabs/ScanTypesTab";
-import { ScanTypesTab } from "../tabs/ScanTypesTab";
 import { SetAdminTab } from "../tabs/SetAdminTab";
 
-type SettingsTab = "questions" | "set-admin" | "applications" | "scan-types";
+type SettingsTab = "set-admin" | "applications";
 
 const settingsTabs = [
-  { id: "questions" as const, label: "Questions", icon: HelpCircle },
   { id: "set-admin" as const, label: "Set Admin", icon: UserCog },
   { id: "applications" as const, label: "Applications", icon: UsersRound },
-  { id: "scan-types" as const, label: "Scans", icon: ScanLine },
 ];
 
 interface SettingsDialogProps {
@@ -47,120 +32,10 @@ interface SettingsDialogProps {
 
 export function SettingsDialog({ trigger }: SettingsDialogProps) {
   const [open, setOpen] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<SettingsTab>("questions");
+  const [activeTab, setActiveTab] = React.useState<SettingsTab>("set-admin");
 
-  const [questions, setQuestions] = React.useState<ShortAnswerQuestion[]>([]);
-  const [loading, setLoading] = React.useState(false);
-  const [saving, setSaving] = React.useState(false);
-
-  const [scanTypes, setScanTypes] = React.useState<ScanType[]>([]);
-  const [scanTypesLoading, setScanTypesLoading] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!open) return;
-    const fetchQuestions = async () => {
-      setLoading(true);
-      const res = await getRequest<{ questions: ShortAnswerQuestion[] }>(
-        "/superadmin/settings/saquestions",
-        "short answer questions",
-      );
-      if (res.status === 200 && res.data) {
-        setQuestions(res.data.questions ?? []);
-      } else {
-        errorAlert(res);
-      }
-      setLoading(false);
-    };
-    const fetchScanTypes = async () => {
-      setScanTypesLoading(true);
-      const res = await getRequest<{ scan_types: ScanType[] }>(
-        "/admin/scans/types",
-        "scan types",
-      );
-      if (res.status === 200 && res.data) {
-        setScanTypes(res.data.scan_types ?? []);
-      } else {
-        errorAlert(res);
-      }
-      setScanTypesLoading(false);
-    };
-    fetchQuestions();
-    fetchScanTypes();
-  }, [open]);
-
-  const handleCancel = () => {
+  const handleClose = () => {
     setOpen(false);
-  };
-
-  const handleSave = async () => {
-    if (activeTab === "questions") {
-      // Validate that all questions have text
-      const emptyQuestion = questions.find((q) => !q.question.trim());
-      if (emptyQuestion) {
-        toast.error("All questions must have text");
-        return;
-      }
-
-      setSaving(true);
-      const payload = questions.map((q, i) => ({
-        ...q,
-        display_order: i + 1,
-      }));
-      const res = await putRequest<{ questions: ShortAnswerQuestion[] }>(
-        "/superadmin/settings/saquestions",
-        { questions: payload },
-        "short answer questions",
-      );
-      if (res.status === 200 && res.data) {
-        setQuestions(res.data.questions);
-        toast.success("Questions saved");
-      } else {
-        errorAlert(res);
-      }
-      setSaving(false);
-    } else if (activeTab === "scan-types") {
-      const emptyName = scanTypes.find((s) => !s.name.trim());
-      if (emptyName) {
-        toast.error("All scan types must have a name");
-        return;
-      }
-
-      const emptyDisplayName = scanTypes.find((s) => !s.display_name.trim());
-      if (emptyDisplayName) {
-        toast.error("All scan types must have a display name");
-        return;
-      }
-
-      const names = scanTypes.map((s) => s.name.trim());
-      if (new Set(names).size !== names.length) {
-        toast.error("Scan type names must be unique");
-        return;
-      }
-
-      const checkInCount = scanTypes.filter(
-        (s) => s.category === "check_in",
-      ).length;
-      if (scanTypes.length > 0 && checkInCount !== 1) {
-        toast.error("Exactly one scan type must have the check_in category");
-        return;
-      }
-
-      setSaving(true);
-      const res = await putRequest<{ scan_types: ScanType[] }>(
-        "/superadmin/settings/scan-types",
-        { scan_types: scanTypes },
-        "scan types",
-      );
-      if (res.status === 200 && res.data) {
-        setScanTypes(res.data.scan_types);
-        toast.success("Scan types saved");
-      } else {
-        errorAlert(res);
-      }
-      setSaving(false);
-    } else {
-      setOpen(false);
-    }
   };
 
   return (
@@ -202,47 +77,18 @@ export function SettingsDialog({ trigger }: SettingsDialogProps) {
           <div className="flex-1 flex flex-col bg-zinc-950 overflow-hidden">
             <ScrollArea className="flex-1 min-h-0">
               <div className="p-8">
-                {activeTab === "questions" && (
-                  <QuestionsTab
-                    questions={questions}
-                    setQuestions={setQuestions}
-                    loading={loading}
-                  />
-                )}
                 {activeTab === "set-admin" && <SetAdminTab />}
                 {activeTab === "applications" && <ApplicationsTab />}
-                {activeTab === "scan-types" && (
-                  <ScanTypesTab
-                    scanTypes={scanTypes}
-                    setScanTypes={setScanTypes}
-                    loading={scanTypesLoading}
-                  />
-                )}
               </div>
             </ScrollArea>
 
-            <Separator className="bg-zinc-800" />
-            <DialogFooter className="p-4 gap-3">
+            <DialogFooter className="border-t border-zinc-800 p-4 gap-3">
               <Button
                 variant="ghost"
-                onClick={handleCancel}
+                onClick={handleClose}
                 className="text-zinc-400 cursor-pointer hover:text-zinc-100 hover:bg-zinc-800"
               >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-zinc-100 text-zinc-900 cursor-pointer hover:bg-zinc-300 disabled:opacity-50"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="size-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save"
-                )}
+                Close
               </Button>
             </DialogFooter>
           </div>
