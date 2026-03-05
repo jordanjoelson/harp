@@ -167,6 +167,29 @@ func (m *MockSettingsStore) SetReviewAssignmentToggle(ctx context.Context, super
 	return args.Error(0)
 }
 
+func (m *MockSettingsStore) GetAdminScheduleEditEnabled(ctx context.Context) (bool, error) {
+	args := m.Called()
+	return args.Bool(0), args.Error(1)
+}
+
+func (m *MockSettingsStore) SetAdminScheduleEditEnabled(ctx context.Context, enabled bool) error {
+	args := m.Called(enabled)
+	return args.Error(0)
+}
+
+func (m *MockSettingsStore) GetHackathonDateRange(ctx context.Context) (HackathonDateRange, error) {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return HackathonDateRange{}, args.Error(1)
+	}
+	return args.Get(0).(HackathonDateRange), args.Error(1)
+}
+
+func (m *MockSettingsStore) SetHackathonDateRange(ctx context.Context, dateRange HackathonDateRange) error {
+	args := m.Called(dateRange)
+	return args.Error(0)
+}
+
 func (m *MockSettingsStore) GetScanTypes(ctx context.Context) ([]ScanType, error) {
 	args := m.Called()
 	if args.Get(0) == nil {
