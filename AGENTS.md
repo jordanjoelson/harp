@@ -10,31 +10,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Backend (Go)
 
-| Command                            | Description                               |
-| ---------------------------------- | ----------------------------------------- |
-| `air`                              | Start backend with hot reload (port 8080) |
-| `go build -o ./tmp/main ./cmd/api` | Build the API binary                      |
-| `task test`                        | Run all Go tests (`go test -v ./...`)     |
-| `task gen-docs`                    | Regenerate Swagger docs                   |
-| `task migrate-up`                  | Apply all DB migrations                   |
-| `task migrate-down`                | Roll back one migration                   |
-| `task migrate-create -- <name>`    | Create a new migration                    |
-| `task seed`                        | Run DB seed script                        |
+| Command                            | Description                                |
+| ---------------------------------- | ------------------------------------------ |
+| `air`                              | Start backend with hot reload (port 8080)  |
+| `go build -o ./tmp/main ./cmd/api` | Build the API binary                       |
+| `task test`                        | Run all Go tests (`go test -v ./...`)      |
+| `task gen-docs`                    | Regenerate Swagger docs                    |
+| `task migrate-up`                  | Apply all DB migrations                    |
+| `task migrate-down`                | Roll back one migration                    |
+| `task migrate-create -- <name>`    | Create a new migration                     |
+| `task seed`                        | Run DB seed script                         |
 | `task setup-hooks`                 | Configure git hooks (run once after clone) |
-| `docker-compose up -d`             | Start PostgreSQL                          |
-| `staticcheck ./...`                | Run static analysis (checked in CI)       |
+| `docker-compose up -d`             | Start PostgreSQL                           |
+| `staticcheck ./...`                | Run static analysis (checked in CI)        |
 
 Note: `air` runs `task gen-docs` as a pre-command on every rebuild, so `swag` CLI must be installed.
 
 ### Frontend (`client/web/`)
 
-| Command              | Description                              |
-| -------------------- | ---------------------------------------- |
-| `npm run dev`        | Start Vite dev server (port 3000)        |
-| `npm run build`      | TypeScript check + Vite production build |
-| `npm run lint`       | Run ESLint                               |
-| `npm run format`     | Auto-format with Prettier                |
-| `npm run format:check` | Check formatting (runs in CI)          |
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Start Vite dev server (port 3000)        |
+| `npm run build`        | TypeScript check + Vite production build |
+| `npm run lint`         | Run ESLint                               |
+| `npm run format`       | Auto-format with Prettier                |
+| `npm run format:check` | Check formatting (runs in CI)            |
 
 ### Dev Tool Prerequisites
 
@@ -142,5 +142,5 @@ Runs on every push/PR to `main` (`.github/workflows/audit.yaml`):
 **Auth:** `GET /v1/auth/check-email`, `GET /v1/auth/me`
 **Hacker:** `GET|PATCH /v1/applications/me`, `POST /v1/applications/me/submit`
 **Admin:** `GET /v1/admin/applications`, `GET /v1/admin/applications/stats`, `GET /v1/admin/applications/{id}`, `GET /v1/admin/applications/{id}/notes`, `GET /v1/admin/reviews/pending`, `GET /v1/admin/reviews/completed`, `GET /v1/admin/reviews/next`, `PUT /v1/admin/reviews/{id}`, `GET /v1/admin/scans/types`, `POST /v1/admin/scans`, `GET /v1/admin/scans/user/{userID}`, `GET /v1/admin/scans/stats`
-**Super Admin:** `GET|PUT /v1/superadmin/settings/saquestions`, `GET|POST /v1/superadmin/settings/reviews-per-app`, `GET|POST /v1/superadmin/settings/review-assignment-toggle`, `POST /v1/superadmin/applications/assign`, `PATCH /v1/superadmin/applications/{id}/status`, `GET /v1/superadmin/applications/emails`, `PUT /v1/superadmin/settings/scan-types`, `POST /v1/superadmin/emails/qr`
+**Super Admin:** `GET|PUT /v1/superadmin/settings/saquestions`, `GET|POST /v1/superadmin/settings/reviews-per-app`, `GET|POST /v1/superadmin/settings/review-assignment-toggle`, `GET|POST /v1/superadmin/settings/admin-schedule-edit-toggle`, `POST /v1/superadmin/applications/assign`, `PATCH /v1/superadmin/applications/{id}/status`, `GET /v1/superadmin/applications/emails`, `PUT /v1/superadmin/settings/scan-types`, `POST /v1/superadmin/emails/qr`
 **Infra (Basic Auth):** `GET /v1/health`, `GET /v1/debug/vars`, `GET /v1/swagger/*`

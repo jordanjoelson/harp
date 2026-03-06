@@ -36,7 +36,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/applications"
                 ],
                 "summary": "List applications (Admin)",
                 "parameters": [
@@ -62,6 +62,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Pagination direction: forward (default) or backward",
                         "name": "direction",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort column: created_at (default), accept_votes, reject_votes, waitlist_votes",
+                        "name": "sort_by",
                         "in": "query"
                     }
                 ],
@@ -131,7 +137,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/applications"
                 ],
                 "summary": "Get application stats (Admin)",
                 "responses": {
@@ -189,7 +195,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/applications"
                 ],
                 "summary": "Get application by ID (Admin)",
                 "parameters": [
@@ -270,7 +276,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/applications"
                 ],
                 "summary": "Set AI percent on a review (Admin)",
                 "parameters": [
@@ -368,7 +374,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/applications"
                 ],
                 "summary": "Get notes for an application (Admin)",
                 "parameters": [
@@ -434,6 +440,106 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/applications/{applicationID}/resume-url": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Generates a signed GCS download URL for an application's resume.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin/applications"
+                ],
+                "summary": "Get resume download URL (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Application ID",
+                        "name": "applicationID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ResumeDownloadURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/admin/reviews/completed": {
             "get": {
                 "security": [
@@ -446,7 +552,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/reviews"
                 ],
                 "summary": "Get completed reviews (Admin)",
                 "responses": {
@@ -504,7 +610,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/reviews"
                 ],
                 "summary": "Get next review assignment (Admin)",
                 "responses": {
@@ -573,7 +679,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/reviews"
                 ],
                 "summary": "Get pending reviews (Admin)",
                 "responses": {
@@ -634,7 +740,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/reviews"
                 ],
                 "summary": "Submit vote on a review (Admin)",
                 "parameters": [
@@ -735,7 +841,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/scans"
                 ],
                 "summary": "Create a scan (Admin)",
                 "parameters": [
@@ -826,7 +932,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/scans"
                 ],
                 "summary": "Get scan statistics (Admin)",
                 "responses": {
@@ -884,7 +990,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/scans"
                 ],
                 "summary": "Get scan types (Admin)",
                 "responses": {
@@ -942,7 +1048,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "admin/scans"
                 ],
                 "summary": "Get scans for a user (Admin)",
                 "parameters": [
@@ -1008,6 +1114,374 @@ const docTemplate = `{
                 }
             }
         },
+        "/admin/schedule": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the full event schedule, ordered by start time ascending",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin/schedule"
+                ],
+                "summary": "List schedule (Admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ScheduleListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Creates a new event in the schedule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin/schedule"
+                ],
+                "summary": "Create schedule item (Admin)",
+                "parameters": [
+                    {
+                        "description": "Schedule item to create",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.CreateSchedulePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/main.ScheduleItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/schedule/date-range": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns configured hackathon start and end dates for schedule rendering",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin/schedule"
+                ],
+                "summary": "Get hackathon date range (Admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.HackathonDateRangeResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/schedule/{scheduleID}": {
+            "put": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Updates an existing event in the schedule",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin/schedule"
+                ],
+                "summary": "Update schedule item (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Schedule item ID",
+                        "name": "scheduleID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Schedule item to update",
+                        "name": "schedule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.UpdateSchedulePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ScheduleItemResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Deletes an event from the schedule",
+                "tags": [
+                    "admin/schedule"
+                ],
+                "summary": "Delete schedule item (Admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Schedule item ID",
+                        "name": "scheduleID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/applications/me": {
             "get": {
                 "security": [
@@ -1023,7 +1497,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "applications"
+                    "hackers"
                 ],
                 "summary": "Get or create application",
                 "responses": {
@@ -1071,7 +1545,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "applications"
+                    "hackers"
                 ],
                 "summary": "Update application",
                 "parameters": [
@@ -1139,6 +1613,155 @@ const docTemplate = `{
                 }
             }
         },
+        "/applications/me/resume": {
+            "delete": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Deletes the resume reference from the authenticated user's draft application and best-effort deletes the object from GCS.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hackers"
+                ],
+                "summary": "Delete resume",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.Application"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/me/resume-upload-url": {
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Generates a signed GCS upload URL for the authenticated user's resume. Application must be in draft status.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "hackers"
+                ],
+                "summary": "Generate resume upload URL",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ResumeUploadURLResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/applications/me/submit": {
             "post": {
                 "security": [
@@ -1151,7 +1774,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "applications"
+                    "hackers"
                 ],
                 "summary": "Submit application",
                 "responses": {
@@ -1316,6 +1939,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/public/schedule": {
+            "get": {
+                "description": "Returns the full event schedule, ordered by start time ascending",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "public"
+                ],
+                "summary": "Get schedule (Public)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "X-API-Key",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ScheduleListResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/superadmin/applications/assign": {
             "post": {
                 "security": [
@@ -1328,7 +2002,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/applications"
                 ],
                 "summary": "Batch assign reviews (SuperAdmin)",
                 "responses": {
@@ -1386,7 +2060,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/applications"
                 ],
                 "summary": "Get applicant emails by status (Super Admin)",
                 "parameters": [
@@ -1467,7 +2141,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/applications"
                 ],
                 "summary": "Set application status (Super Admin)",
                 "parameters": [
@@ -1553,26 +2227,246 @@ const docTemplate = `{
                 }
             }
         },
-        "/superadmin/emails/qr": {
+        "/superadmin/settings/admin-schedule-edit-toggle": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns whether users with admin role can create, update, and delete schedule items",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "superadmin/settings"
+                ],
+                "summary": "Get admin schedule edit state (Super Admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.AdminScheduleEditToggleResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
                         "CookieAuth": []
                     }
                 ],
-                "description": "Generates and sends personalized QR code emails to all accepted hackers. QR encodes the user UUID for check-in scanning.",
+                "description": "Updates whether users with admin role can create, update, and delete schedule items",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
-                "summary": "Send QR code emails (Super Admin)",
+                "summary": "Set admin schedule edit state (Super Admin)",
+                "parameters": [
+                    {
+                        "description": "Admin schedule editing enabled state",
+                        "name": "enabled",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.SetAdminScheduleEditTogglePayload"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.SendQREmailsResponse"
+                            "$ref": "#/definitions/main.AdminScheduleEditToggleResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/superadmin/settings/hackathon-date-range": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns configured hackathon start and end dates",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "superadmin/settings"
+                ],
+                "summary": "Get hackathon date range (Super Admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.HackathonDateRangeResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Updates configured hackathon start and end dates. Range must be at most 7 days inclusive.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "superadmin/settings"
+                ],
+                "summary": "Set hackathon date range (Super Admin)",
+                "parameters": [
+                    {
+                        "description": "Hackathon date range",
+                        "name": "range",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.SetHackathonDateRangePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.HackathonDateRangeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -1623,7 +2517,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Get review assignment settings (Super Admin)",
                 "responses": {
@@ -1682,7 +2576,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Set review assignment enabled state for a user (Super Admin)",
                 "parameters": [
@@ -1762,7 +2656,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Get reviews per application (Super Admin)",
                 "responses": {
@@ -1821,7 +2715,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Set reviews per application (Super Admin)",
                 "parameters": [
@@ -1901,7 +2795,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Get short answer questions (Super Admin)",
                 "responses": {
@@ -1960,7 +2854,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Update short answer questions (Super Admin)",
                 "parameters": [
@@ -2043,7 +2937,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/settings"
                 ],
                 "summary": "Update scan types (Super Admin)",
                 "parameters": [
@@ -2123,7 +3017,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/users"
                 ],
                 "summary": "Search users (Super Admin)",
                 "parameters": [
@@ -2216,7 +3110,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "superadmin"
+                    "superadmin/users"
                 ],
                 "summary": "Update user role (Super Admin)",
                 "parameters": [
@@ -2309,6 +3203,28 @@ const docTemplate = `{
             "properties": {
                 "ai_percent": {
                     "type": "integer"
+                }
+            }
+        },
+        "main.AdminScheduleEditToggleResponse": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "main.ApplicantInfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
                 }
             }
         },
@@ -2413,6 +3329,9 @@ const docTemplate = `{
                 "reject_votes": {
                     "type": "integer"
                 },
+                "resume_path": {
+                    "type": "string"
+                },
                 "reviews_assigned": {
                     "type": "integer"
                 },
@@ -2500,17 +3419,64 @@ const docTemplate = `{
                 }
             }
         },
-        "main.EmailListResponse": {
+        "main.CreateSchedulePayload": {
             "type": "object",
+            "required": [
+                "end_time",
+                "event_name",
+                "start_time"
+            ],
             "properties": {
-                "count": {
-                    "type": "integer"
+                "description": {
+                    "type": "string"
                 },
-                "emails": {
+                "end_time": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "location": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "main.EmailListResponse": {
+            "type": "object",
+            "properties": {
+                "applicants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.ApplicantInfo"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "main.HackathonDateRangeResponse": {
+            "type": "object",
+            "properties": {
+                "configured": {
+                    "type": "boolean"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
                 }
             }
         },
@@ -2546,6 +3512,10 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
+        "main.ResumeDownloadURLResponse": {
+            "type": "object",
+            "properties": {
+                "download_url": {
                     "type": "string"
                 }
             }
@@ -2558,6 +3528,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/main.ReviewAssignmentAdmin"
                     }
+        "main.ResumeUploadURLResponse": {
+            "type": "object",
+            "properties": {
+                "resume_path": {
+                    "type": "string"
+                },
+                "upload_url": {
+                    "type": "string"
                 }
             }
         },
@@ -2618,23 +3596,22 @@ const docTemplate = `{
                 }
             }
         },
-        "main.SendQREmailsResponse": {
+        "main.ScheduleItemResponse": {
             "type": "object",
             "properties": {
-                "errors": {
+                "schedule": {
+                    "$ref": "#/definitions/store.ScheduleItem"
+                }
+            }
+        },
+        "main.ScheduleListResponse": {
+            "type": "object",
+            "properties": {
+                "schedule": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/store.ScheduleItem"
                     }
-                },
-                "failed": {
-                    "type": "integer"
-                },
-                "sent": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
                 }
             }
         },
@@ -2645,6 +3622,29 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 0
+                }
+            }
+        },
+        "main.SetAdminScheduleEditTogglePayload": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "main.SetHackathonDateRangePayload": {
+            "type": "object",
+            "required": [
+                "end_date",
+                "start_date"
+            ],
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
                 }
             }
         },
@@ -2731,105 +3731,7 @@ const docTemplate = `{
             }
         },
         "main.UpdateApplicationPayload": {
-            "type": "object",
-            "properties": {
-                "accommodations": {
-                    "type": "string"
-                },
-                "ack_application": {
-                    "type": "boolean"
-                },
-                "ack_mlh_coc": {
-                    "type": "boolean"
-                },
-                "ack_mlh_privacy": {
-                    "type": "boolean"
-                },
-                "age": {
-                    "type": "integer",
-                    "maximum": 150,
-                    "minimum": 1
-                },
-                "country_of_residence": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "dietary_restrictions": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "ethnicity": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "first_name": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "gender": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "github": {
-                    "type": "string"
-                },
-                "hackathons_attended_count": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "heard_about": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "last_name": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "level_of_study": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "linkedin": {
-                    "type": "string"
-                },
-                "major": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "opt_in_mlh_emails": {
-                    "type": "boolean"
-                },
-                "phone_e164": {
-                    "type": "string"
-                },
-                "race": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "shirt_size": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "short_answer_responses": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "software_experience_level": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "university": {
-                    "type": "string",
-                    "minLength": 1
-                },
-                "website": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "main.UpdateRolePayload": {
             "type": "object",
@@ -2861,6 +3763,39 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/store.ScanType"
+                    }
+                }
+            }
+        },
+        "main.UpdateSchedulePayload": {
+            "type": "object",
+            "required": [
+                "end_time",
+                "event_name",
+                "start_time"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "location": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
                     }
                 }
             }
@@ -3009,6 +3944,9 @@ const docTemplate = `{
                 "reject_votes": {
                     "type": "integer"
                 },
+                "resume_path": {
+                    "type": "string"
+                },
                 "reviews_assigned": {
                     "type": "integer"
                 },
@@ -3082,6 +4020,9 @@ const docTemplate = `{
                 },
                 "hackathons_attended_count": {
                     "type": "integer"
+                },
+                "has_resume": {
+                    "type": "boolean"
                 },
                 "id": {
                     "type": "string"
@@ -3412,6 +4353,41 @@ const docTemplate = `{
                 "ScanCategorySwag",
                 "ScanCategoryOther"
             ]
+        },
+        "store.ScheduleItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "event_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
         },
         "store.ShortAnswerQuestion": {
             "type": "object",

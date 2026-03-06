@@ -3,9 +3,7 @@
 import {
   Calendar,
   CircleCheck,
-  CircleHelp,
   ClipboardList,
-  Mail,
   ScanLine,
   Settings,
   Star,
@@ -59,14 +57,14 @@ const eventNav = [
     url: "/admin/schedule",
     icon: Calendar,
   },
-  {
-    name: "FAQs",
-    url: "/admin/faqs",
-    icon: CircleHelp,
-  },
 ];
 
 const superAdminNav = [
+  {
+    name: "Reviews",
+    url: "/admin/sa/reviews",
+    icon: Star,
+  },
   {
     name: "User Management",
     url: "/admin/sa/user-management",
@@ -76,16 +74,6 @@ const superAdminNav = [
     name: "Application",
     url: "/admin/sa/application",
     icon: ClipboardList,
-  },
-  {
-    name: "Reviews",
-    url: "/admin/sa/reviews",
-    icon: Star,
-  },
-  {
-    name: "Emails",
-    url: "/admin/sa/emails",
-    icon: Mail,
   },
 ];
 
