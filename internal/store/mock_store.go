@@ -334,7 +334,7 @@ type MockSponsorsStore struct {
 }
 
 func (m *MockSponsorsStore) List(ctx context.Context) ([]Sponsor, error) {
-	args := m.Called()
+	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -342,22 +342,22 @@ func (m *MockSponsorsStore) List(ctx context.Context) ([]Sponsor, error) {
 }
 
 func (m *MockSponsorsStore) Create(ctx context.Context, sponsor *Sponsor) error {
-	args := m.Called(sponsor)
+	args := m.Called(ctx, sponsor)
 	return args.Error(0)
 }
 
 func (m *MockSponsorsStore) Update(ctx context.Context, sponsor *Sponsor) error {
-	args := m.Called(sponsor)
+	args := m.Called(ctx, sponsor)
 	return args.Error(0)
 }
 
 func (m *MockSponsorsStore) Delete(ctx context.Context, id string) error {
-	args := m.Called(id)
+	args := m.Called(ctx, id)
 	return args.Error(0)
 }
 
 func (m *MockSponsorsStore) GetByID(ctx context.Context, id string) (*Sponsor, error) {
-	args := m.Called(id)
+	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}

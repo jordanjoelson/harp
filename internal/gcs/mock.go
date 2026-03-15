@@ -10,23 +10,23 @@ type MockClient struct {
 	mock.Mock
 }
 
-func (m *MockClient) GenerateUploadURL(_ context.Context, objectPath string) (string, error) {
-	args := m.Called(objectPath)
+func (m *MockClient) GenerateUploadURL(ctx context.Context, objectPath string) (string, error) {
+	args := m.Called(ctx, objectPath)
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockClient) GenerateImageUploadURL(_ context.Context, objectPath string) (string, error) {
-	args := m.Called(objectPath)
+func (m *MockClient) GenerateImageUploadURL(ctx context.Context, objectPath string) (string, error) {
+	args := m.Called(ctx, objectPath)
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockClient) GenerateDownloadURL(_ context.Context, objectPath string) (string, error) {
-	args := m.Called(objectPath)
+func (m *MockClient) GenerateDownloadURL(ctx context.Context, objectPath string) (string, error) {
+	args := m.Called(ctx, objectPath)
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockClient) DeleteObject(_ context.Context, objectPath string) error {
-	args := m.Called(objectPath)
+func (m *MockClient) DeleteObject(ctx context.Context, objectPath string) error {
+	args := m.Called(ctx, objectPath)
 	return args.Error(0)
 }
 
