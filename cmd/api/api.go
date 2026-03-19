@@ -219,6 +219,17 @@ func (app *application) mount() http.Handler {
 							r.Delete("/{scheduleID}", app.deleteScheduleHandler)
 						})
 					})
+
+					// Sponsors
+					r.Route("/sponsors", func(r chi.Router) {
+						r.Get("/", app.listSponsorsHandler)
+
+						// TODO: Protect Under a AdminSponsorEditPermissionMiddleware
+						r.Post("/", app.createSponsorHandler)
+						r.Put("/{sponsorID}", app.updateSponsorHandler)
+						r.Delete("/{sponsorID}", app.deleteSponsorHandler)
+						r.Post("/{sponsorID}/logo-upload-url", app.generateLogoUploadURLHandler)
+					})
 				})
 			})
 
@@ -251,15 +262,6 @@ func (app *application) mount() http.Handler {
 					r.Route("/users", func(r chi.Router) {
 						r.Get("/", app.searchUsersHandler)
 						r.Patch("/{userID}/role", app.updateUserRoleHandler)
-					})
-
-					// Sponsors
-					r.Route("/sponsors", func(r chi.Router) {
-						r.Get("/", app.listSponsorsHandler)
-						r.Post("/", app.createSponsorHandler)
-						r.Put("/{sponsorID}", app.updateSponsorHandler)
-						r.Delete("/{sponsorID}", app.deleteSponsorHandler)
-						r.Post("/{sponsorID}/logo-upload-url", app.generateLogoUploadURLHandler)
 					})
 				})
 			})
