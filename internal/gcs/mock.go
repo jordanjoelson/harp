@@ -15,8 +15,8 @@ func (m *MockClient) GenerateUploadURL(ctx context.Context, objectPath string) (
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockClient) GenerateImageUploadURL(ctx context.Context, objectPath string) (string, error) {
-	args := m.Called(ctx, objectPath)
+func (m *MockClient) GenerateImageUploadURL(ctx context.Context, objectPath string, contentType string) (string, error) {
+	args := m.Called(ctx, objectPath, contentType)
 	return args.String(0), args.Error(1)
 }
 

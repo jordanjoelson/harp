@@ -3318,6 +3318,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Generates a signed GCS upload URL for a sponsor logo.",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -3332,6 +3335,15 @@ const docTemplate = `{
                         "name": "sponsorID",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Upload URL request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.LogoUploadURLPayload"
+                        }
                     }
                 ],
                 "responses": {
@@ -3339,6 +3351,17 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/main.LogoUploadURLResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "401": {
@@ -3863,9 +3886,23 @@ const docTemplate = `{
                 }
             }
         },
+        "main.LogoUploadURLPayload": {
+            "type": "object",
+            "required": [
+                "content_type"
+            ],
+            "properties": {
+                "content_type": {
+                    "type": "string"
+                }
+            }
+        },
         "main.LogoUploadURLResponse": {
             "type": "object",
             "properties": {
+                "content_type": {
+                    "type": "string"
+                },
                 "logo_path": {
                     "type": "string"
                 },

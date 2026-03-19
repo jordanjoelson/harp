@@ -12,7 +12,15 @@ const (
 	signedURLExpiry    = 15 * time.Minute
 	resumeContentType  = "application/pdf"
 	maxResumeSizeBytes = 5 * 1024 * 1024
+	maxImageSizeBytes  = 2 * 1024 * 1024
 )
+
+var AllowedImageContentTypes = map[string]bool{
+	"image/png":  true,
+	"image/jpeg": true,
+	"image/webp": true,
+	"image/gif":  true,
+}
 
 type GCSClient struct {
 	client     *storage.Client
@@ -50,12 +58,15 @@ func (c *GCSClient) GenerateUploadURL(_ context.Context, objectPath string) (str
 	return url, nil
 }
 
-func (c *GCSClient) GenerateImageUploadURL(_ context.Context, objectPath string) (string, error) {
+func (c *GCSClient) GenerateImageUploadURL(_ context.Context, objectPath string, contentType string) (string, error) {
 	url, err := c.bucket.SignedURL(objectPath, &storage.SignedURLOptions{
 		Method:      "PUT",
 		Expires:     time.Now().Add(signedURLExpiry),
-		ContentType: "image/*",
-		Scheme:      storage.SigningSchemeV4,
+		ContentType: contentType,
+		Headers: []string{
+			fmt.Sprintf("x-goog-content-length-range:0,%d", maxImageSizeBytes),
+		},
+		Scheme: storage.SigningSchemeV4,
 	})
 	if err != nil {
 		return "", err

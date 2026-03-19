@@ -47,7 +47,7 @@ func TestListSponsors(t *testing.T) {
 		sponsors := []store.Sponsor{newTestSponsor("sponsor-1"), newTestSponsor("sponsor-2")}
 		sponsors[1].LogoPath = "" // Test one without a logo
 
-		mockSponsors.On("List", mock.Anything).Return(sponsors, nil).Once()
+		mockSponsors.On("List").Return(sponsors, nil).Once()
 		mockGCS.On("GeneratePublicURL", sponsors[0].LogoPath).Return("https://public.url/logo.png").Once()
 
 		req, err := http.NewRequest(http.MethodGet, "/", nil)
@@ -79,7 +79,7 @@ func TestGetPublicSponsors(t *testing.T) {
 
 	t.Run("should return sponsors with valid api key", func(t *testing.T) {
 		sponsors := []store.Sponsor{newTestSponsor("sponsor-1")}
-		mockSponsors.On("List", mock.Anything).Return(sponsors, nil).Once()
+		mockSponsors.On("List").Return(sponsors, nil).Once()
 		mockGCS.On("GeneratePublicURL", sponsors[0].LogoPath).Return("https://public.url/logo.png").Once()
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/public/sponsors", nil)
@@ -115,8 +115,8 @@ func TestCreateSponsor(t *testing.T) {
 	mockSponsors := app.store.Sponsors.(*store.MockSponsorsStore)
 
 	t.Run("should create a sponsor", func(t *testing.T) {
-		mockSponsors.On("Create", mock.Anything, mock.AnythingOfType("*store.Sponsor")).Run(func(args mock.Arguments) {
-			sponsor := args.Get(1).(*store.Sponsor)
+		mockSponsors.On("Create", mock.AnythingOfType("*store.Sponsor")).Run(func(args mock.Arguments) {
+			sponsor := args.Get(0).(*store.Sponsor)
 			sponsor.ID = "new-sponsor" // Simulate DB setting ID
 		}).Return(nil).Once()
 
@@ -161,8 +161,8 @@ func TestUpdateSponsor(t *testing.T) {
 		updatedSponsor := newTestSponsor(sponsorID)
 		updatedSponsor.Name = "Updated Name"
 
-		mockSponsors.On("Update", mock.Anything, mock.AnythingOfType("*store.Sponsor")).Return(nil).Once()
-		mockSponsors.On("GetByID", mock.Anything, sponsorID).Return(&updatedSponsor, nil).Once()
+		mockSponsors.On("Update", mock.AnythingOfType("*store.Sponsor")).Return(nil).Once()
+		mockSponsors.On("GetByID", sponsorID).Return(&updatedSponsor, nil).Once()
 
 		mockGCS := app.gcsClient.(*gcs.MockClient)
 		mockGCS.On("GeneratePublicURL", updatedSponsor.LogoPath).
@@ -191,7 +191,7 @@ func TestUpdateSponsor(t *testing.T) {
 	})
 
 	t.Run("should return 404 if sponsor not found", func(t *testing.T) {
-		mockSponsors.On("Update", mock.Anything, mock.AnythingOfType("*store.Sponsor")).Return(store.ErrNotFound).Once()
+		mockSponsors.On("Update", mock.AnythingOfType("*store.Sponsor")).Return(store.ErrNotFound).Once()
 
 		body := `{"name":"Updated Name","tier":"Gold","display_order":1}`
 		req, err := http.NewRequest(http.MethodPut, "/", strings.NewReader(body))
@@ -215,8 +215,8 @@ func TestDeleteSponsor(t *testing.T) {
 	t.Run("should delete a sponsor and its logo", func(t *testing.T) {
 		sponsor := newTestSponsor("sponsor-to-delete")
 
-		mockSponsors.On("GetByID", mock.Anything, sponsor.ID).Return(&sponsor, nil).Once()
-		mockSponsors.On("Delete", mock.Anything, sponsor.ID).Return(nil).Once()
+		mockSponsors.On("GetByID", sponsor.ID).Return(&sponsor, nil).Once()
+		mockSponsors.On("Delete", sponsor.ID).Return(nil).Once()
 		mockGCS.On("DeleteObject", mock.Anything, sponsor.LogoPath).Return(nil).Once()
 
 		req, err := http.NewRequest(http.MethodDelete, "/", nil)
@@ -232,7 +232,7 @@ func TestDeleteSponsor(t *testing.T) {
 	})
 
 	t.Run("should return 404 if sponsor not found", func(t *testing.T) {
-		mockSponsors.On("GetByID", mock.Anything, "nonexistent").Return(nil, store.ErrNotFound).Once()
+		mockSponsors.On("GetByID", "nonexistent").Return(nil, store.ErrNotFound).Once()
 
 		req, err := http.NewRequest(http.MethodDelete, "/", nil)
 		require.NoError(t, err)
@@ -253,13 +253,15 @@ func TestGenerateLogoUploadURL(t *testing.T) {
 
 	t.Run("should generate an upload url", func(t *testing.T) {
 		sponsor := newTestSponsor("sponsor-1")
-		mockSponsors.On("GetByID", mock.Anything, sponsor.ID).Return(&sponsor, nil).Once()
+		mockSponsors.On("GetByID", sponsor.ID).Return(&sponsor, nil).Once()
 		mockGCS.On("GenerateImageUploadURL", mock.Anything, mock.MatchedBy(func(path string) bool {
 			return strings.HasPrefix(path, "sponsors/"+sponsor.ID+"/")
-		})).Return("https://upload.url/logo", nil).Once()
+		}), "image/png").Return("https://upload.url/logo", nil).Once()
 
-		req, err := http.NewRequest(http.MethodPost, "/", nil)
+		reqBody := `{"content_type":"image/png"}`
+		req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(reqBody))
 		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
 		req = setUserContext(req, newSuperAdminUser())
 		req = withSponsorRouteParam(req, sponsor.ID)
 
@@ -273,13 +275,14 @@ func TestGenerateLogoUploadURL(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, "https://upload.url/logo", body.Data.UploadURL)
 		assert.True(t, strings.HasPrefix(body.Data.LogoPath, "sponsors/"+sponsor.ID+"/"))
+		assert.Equal(t, "image/png", body.Data.ContentType)
 
 		mockSponsors.AssertExpectations(t)
 		mockGCS.AssertExpectations(t)
 	})
 
 	t.Run("should return 404 if sponsor not found", func(t *testing.T) {
-		mockSponsors.On("GetByID", mock.Anything, "nonexistent").Return(nil, store.ErrNotFound).Once()
+		mockSponsors.On("GetByID", "nonexistent").Return(nil, store.ErrNotFound).Once()
 
 		req, err := http.NewRequest(http.MethodPost, "/", nil)
 		require.NoError(t, err)
@@ -294,7 +297,7 @@ func TestGenerateLogoUploadURL(t *testing.T) {
 
 	t.Run("should return 503 if gcs is not configured", func(t *testing.T) {
 		sponsor := newTestSponsor("sponsor-1")
-		mockSponsors.On("GetByID", mock.Anything, sponsor.ID).Return(&sponsor, nil).Once()
+		mockSponsors.On("GetByID", sponsor.ID).Return(&sponsor, nil).Once()
 		app.gcsClient = nil
 
 		req, err := http.NewRequest(http.MethodPost, "/", nil)
@@ -311,11 +314,13 @@ func TestGenerateLogoUploadURL(t *testing.T) {
 
 	t.Run("should return 500 if url generation fails", func(t *testing.T) {
 		sponsor := newTestSponsor("sponsor-1")
-		mockSponsors.On("GetByID", mock.Anything, sponsor.ID).Return(&sponsor, nil).Once()
-		mockGCS.On("GenerateImageUploadURL", mock.Anything, mock.AnythingOfType("string")).Return("", errors.New("gcs error")).Once()
+		mockSponsors.On("GetByID", sponsor.ID).Return(&sponsor, nil).Once()
+		mockGCS.On("GenerateImageUploadURL", mock.Anything, mock.AnythingOfType("string"), "image/png").Return("", errors.New("gcs error")).Once()
 
-		req, err := http.NewRequest(http.MethodPost, "/", nil)
+		reqBody := `{"content_type":"image/png"}`
+		req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(reqBody))
 		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
 		req = setUserContext(req, newSuperAdminUser())
 		req = withSponsorRouteParam(req, sponsor.ID)
 
@@ -324,5 +329,39 @@ func TestGenerateLogoUploadURL(t *testing.T) {
 
 		mockSponsors.AssertExpectations(t)
 		mockGCS.AssertExpectations(t)
+	})
+
+	t.Run("should return 400 for missing content_type", func(t *testing.T) {
+		sponsor := newTestSponsor("sponsor-1")
+		mockSponsors.On("GetByID", sponsor.ID).Return(&sponsor, nil).Once()
+
+		reqBody := `{}`
+		req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(reqBody))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+		req = setUserContext(req, newSuperAdminUser())
+		req = withSponsorRouteParam(req, sponsor.ID)
+
+		rr := executeRequest(req, http.HandlerFunc(app.generateLogoUploadURLHandler))
+		checkResponseCode(t, http.StatusBadRequest, rr.Code)
+
+		mockSponsors.AssertExpectations(t)
+	})
+
+	t.Run("should return 400 for unsupported content_type", func(t *testing.T) {
+		sponsor := newTestSponsor("sponsor-1")
+		mockSponsors.On("GetByID", sponsor.ID).Return(&sponsor, nil).Once()
+
+		reqBody := `{"content_type":"application/pdf"}`
+		req, err := http.NewRequest(http.MethodPost, "/", strings.NewReader(reqBody))
+		require.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+		req = setUserContext(req, newSuperAdminUser())
+		req = withSponsorRouteParam(req, sponsor.ID)
+
+		rr := executeRequest(req, http.HandlerFunc(app.generateLogoUploadURLHandler))
+		checkResponseCode(t, http.StatusBadRequest, rr.Code)
+
+		mockSponsors.AssertExpectations(t)
 	})
 }

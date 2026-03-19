@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
+	"github.com/hackutd/portal/internal/gcs"
 	"github.com/hackutd/portal/internal/store"
 )
 
@@ -27,9 +28,14 @@ type SponsorListResponse struct {
 	Sponsors []SponsorResponse `json:"sponsors"`
 }
 
+type LogoUploadURLPayload struct {
+	ContentType string `json:"content_type" validate:"required"`
+}
+
 type LogoUploadURLResponse struct {
-	UploadURL string `json:"upload_url"`
-	LogoPath  string `json:"logo_path"`
+	UploadURL   string `json:"upload_url"`
+	LogoPath    string `json:"logo_path"`
+	ContentType string `json:"content_type"`
 }
 
 // listSponsorsHandler returns all sponsors (Super Admin)
@@ -239,9 +245,12 @@ func (app *application) deleteSponsorHandler(w http.ResponseWriter, r *http.Requ
 //	@Summary		Generate logo upload URL (Super Admin)
 //	@Description	Generates a signed GCS upload URL for a sponsor logo.
 //	@Tags			superadmin/sponsors
+//	@Accept			json
 //	@Produce		json
-//	@Param			sponsorID	path		string	true	"Sponsor ID"
+//	@Param			sponsorID	path		string					true	"Sponsor ID"
+//	@Param			body		body		LogoUploadURLPayload	true	"Upload URL request"
 //	@Success		200			{object}	LogoUploadURLResponse
+//	@Failure		400			{object}	object{error=string}
 //	@Failure		401			{object}	object{error=string}
 //	@Failure		403			{object}	object{error=string}
 //	@Failure		404			{object}	object{error=string}
@@ -269,6 +278,20 @@ func (app *application) generateLogoUploadURLHandler(w http.ResponseWriter, r *h
 		return
 	}
 
+	var payload LogoUploadURLPayload
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+	if !gcs.AllowedImageContentTypes[payload.ContentType] {
+		app.badRequestResponse(w, r, fmt.Errorf("unsupported content type: %s", payload.ContentType))
+		return
+	}
+
 	randomID, err := randomHex(16)
 	if err != nil {
 		app.internalServerError(w, r, err)
@@ -277,15 +300,16 @@ func (app *application) generateLogoUploadURLHandler(w http.ResponseWriter, r *h
 
 	objectPath := fmt.Sprintf("sponsors/%s/%s", id, randomID)
 
-	uploadURL, err := app.gcsClient.GenerateImageUploadURL(r.Context(), objectPath)
+	uploadURL, err := app.gcsClient.GenerateImageUploadURL(r.Context(), objectPath, payload.ContentType)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
 
 	if err := app.jsonResponse(w, http.StatusOK, LogoUploadURLResponse{
-		UploadURL: uploadURL,
-		LogoPath:  objectPath,
+		UploadURL:   uploadURL,
+		LogoPath:    objectPath,
+		ContentType: payload.ContentType,
 	}); err != nil {
 		app.internalServerError(w, r, err)
 	}

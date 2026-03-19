@@ -9,3 +9,7 @@ CREATE TABLE sponsors (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TRIGGER set_updated_at_sponsors
+    BEFORE UPDATE ON sponsors FOR EACH ROW
+    EXECUTE FUNCTION set_updated_at();
